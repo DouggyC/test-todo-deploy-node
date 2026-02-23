@@ -12,10 +12,11 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-      ECS_CLUSTER: test-todo-node-ecs
-      ECS_SERVICE: task-to-auto-scale-todo-ecs-service-ncw1cyzz
-      ECS_TASK_ROLE: ${{ secrets.ECS_TASK_ROLE }}  # ecsTaskExecutionRole ARN
+      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}   # Docker image repo
+      ECS_CLUSTER: test-todo-node-ecs                 # ECS cluster name
+      ECS_SERVICE: task-to-auto-scale-todo-ecs-service-ncw1cyzz  # ECS service name
+      ECS_TASK_ROLE: ${{ secrets.ECS_TASK_ROLE }}    # ecsTaskExecutionRole ARN
+      CONTAINER_NAME: todo-container                  # Must match container in ECS task definition
 
     steps:
       - name: Checkout
@@ -56,7 +57,7 @@ jobs:
             --memory 1024 \
             --execution-role-arn $ECS_TASK_ROLE \
             --container-definitions "[{
-              \"name\": \"$ECR_REPOSITORY\",
+              \"name\": \"$CONTAINER_NAME\",
               \"image\": \"$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG\",
               \"portMappings\": [{\"containerPort\": 3000, \"protocol\": \"tcp\"}]
             }]" \
