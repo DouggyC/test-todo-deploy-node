@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "target": "ES2022",
-    "strict": true
-  }
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "outDir": "dist", // <-- important!
+    "rootDir": ".", // source root
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["*.ts"] // include your source files
 }
