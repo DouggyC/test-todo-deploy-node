@@ -1,20 +1,35 @@
-# Use official Node LTS image
-FROM node:20-alpine
+# Stage 1: build TypeScript
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy package files first to leverage caching
-COPY package*.json ./
+# Copy package files and tsconfig
+COPY package*.json tsconfig.json ./
 
-# Install dependencies
-RUN npm install --production
+# Install dev dependencies for building
+RUN npm install
 
-# Copy app source
+# Copy all source files
 COPY . .
 
-# Expose port (the same your Node app listens on, e.g., 3000)
+# Build TypeScript to JS (output in /dist)
+RUN npm run build
+
+# Stage 2: production image
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# Install only production dependencies
+COPY package*.json ./
+RUN npm install --production
+
+# Copy compiled JS from builder
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose port
 EXPOSE 3000
 
-# Start the app
-CMD ["node", "index.js"]
+# Run the app
+CMD ["node", "dist/index.js"]

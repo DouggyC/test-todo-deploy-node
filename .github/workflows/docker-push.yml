@@ -68,8 +68,7 @@ jobs:
                 \"options\": {
                   \"awslogs-group\": \"/ecs/$ECR_REPOSITORY\",
                   \"awslogs-region\": \"$AWS_REGION\",
-                  \"awslogs-stream-prefix\": \"ecs\",
-                  \"awslogs-create-group\": \"true\"
+                  \"awslogs-stream-prefix\": \"ecs\"
                 }
               }
             }]" \
