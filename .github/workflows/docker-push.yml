@@ -16,7 +16,7 @@ jobs:
       ECS_CLUSTER: test-todo-node-ecs                 # ECS cluster name
       ECS_SERVICE: task-to-auto-scale-todo-ecs-service-ncw1cyzz  # ECS service name
       ECS_TASK_ROLE: ${{ secrets.ECS_TASK_ROLE }}    # ecsTaskExecutionRole ARN
-      CONTAINER_NAME: todo-container                  # Must match container in ECS task definition
+      CONTAINER_NAME: todo-container                  # Must match container name in ECS task definition
 
     steps:
       - name: Checkout
@@ -59,7 +59,18 @@ jobs:
             --container-definitions "[{
               \"name\": \"$CONTAINER_NAME\",
               \"image\": \"$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG\",
-              \"portMappings\": [{\"containerPort\": 3000, \"protocol\": \"tcp\"}]
+              \"portMappings\": [{\"containerPort\": 3000, \"protocol\": \"tcp\"}],
+              \"environment\": [
+                {\"name\": \"PORT\", \"value\": \"3000\"}
+              ],
+              \"logConfiguration\": {
+                \"logDriver\": \"awslogs\",
+                \"options\": {
+                  \"awslogs-group\": \"/ecs/$ECR_REPOSITORY\",
+                  \"awslogs-region\": \"$AWS_REGION\",
+                  \"awslogs-stream-prefix\": \"ecs\"
+                }
+              }
             }]" \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
