@@ -15,7 +15,7 @@ jobs:
       ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
       ECS_CLUSTER: test-todo-node-ecs
       ECS_SERVICE: task-to-auto-scale-todo-ecs-service-ncw1cyzz
-      ECS_TASK_ROLE: ${{ secrets.ECS_TASK_ROLE }} # your ecsTaskExecutionRole ARN
+      ECS_TASK_ROLE: ${{ secrets.ECS_TASK_ROLE }}  # ecsTaskExecutionRole ARN
 
     steps:
       - name: Checkout
@@ -33,7 +33,7 @@ jobs:
 
       - name: Build Image
         run: |
-          IMAGE_TAG=${GITHUB_SHA::8}  # first 8 chars of commit SHA
+          IMAGE_TAG=${GITHUB_SHA::8}  # use first 8 chars of commit SHA
           docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
@@ -48,7 +48,7 @@ jobs:
 
       - name: Register new ECS task definition
         run: |
-          aws ecs register-task-definition \
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
             --family $ECR_REPOSITORY \
             --network-mode awsvpc \
             --requires-compatibilities FARGATE \
@@ -61,8 +61,8 @@ jobs:
               \"portMappings\": [{\"containerPort\": 3000, \"protocol\": \"tcp\"}]
             }]" \
             --query 'taskDefinition.taskDefinitionArn' \
-            --output text > taskdef_arn.txt
-          echo "TASK_DEFINITION=$(cat taskdef_arn.txt)" >> $GITHUB_ENV
+            --output text)
+          echo "TASK_DEFINITION=$TASK_DEF_ARN" >> $GITHUB_ENV
 
       - name: Update ECS service
         run: |
